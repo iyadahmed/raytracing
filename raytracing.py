@@ -1,3 +1,5 @@
+# It is better to keep aspect ratios of image and viewport the same
+# and yes you can just calculate it here in code
 IMAGE_WIDTH = 512
 IMAGE_HEIGHT = 512
 
@@ -38,6 +40,7 @@ class Vec3:
 			return Vec3(self.x * other, self.y * other, self.z * other)
 		raise NotImplementedError
 
+# https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
 def ray_sphere_intersection(ro, rd, sphere_center, sphere_radius):
 	L = sphere_center - ro
 	tca = L.dot(rd)
