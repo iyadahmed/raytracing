@@ -1,5 +1,5 @@
-IMAGE_WIDTH = 256
-IMAGE_HEIGHT = 256
+IMAGE_WIDTH = 512
+IMAGE_HEIGHT = 512
 
 VIEWPORT_WIDTH = 1.0
 VIEWPORT_HEIGHT = 1.0
@@ -23,6 +23,10 @@ class Vec3:
 		self.x /= l
 		self.y /= l
 		self.z /= l
+	def normalized(self):
+		out = Vec3(self.x, self.y, self.z)
+		out.normalize()
+		return out
 	def dot(self, other):
 		return self.x*other.x + self.y*other.y + self.z*other.z
 	def __sub__(self, other):
@@ -46,8 +50,13 @@ def ray_sphere_intersection(ro, rd, sphere_center, sphere_radius):
 	#t1 = tca + thc
 	return ro + rd * t0
 
+def clamp(v, lower, upper):
+	return min(upper, max(v, lower))
 
 ray_origin = Vec3(CAM_X, CAM_Y, CAM_Z)
+SPHERE_CENTER = Vec3(.5, .5, 2)
+SPHERE_RADIUS = 1.0
+LIGHT_DIRECTION = Vec3(-1, -1, -1).normalized()
 with open("render.ppm", "w") as file:
 	file.write("P3\n") # "P3" means this is a RGB color image in ASCII
 	file.write(f"{IMAGE_WIDTH} {IMAGE_HEIGHT}\n")
@@ -57,5 +66,10 @@ with open("render.ppm", "w") as file:
 			pixel_position = Vec3((X / IMAGE_WIDTH) * VIEWPORT_WIDTH, (Y / IMAGE_HEIGHT) * VIEWPORT_HEIGHT, 0.0)
 			ray_direction = pixel_position - ray_origin
 			ray_direction.normalize()
-			b = ray_sphere_intersection(ray_origin, ray_direction, Vec3(.5, .5, 10), 1)
-			file.write(f"{255 if b else 0} 0 0\n")
+			p = ray_sphere_intersection(ray_origin, ray_direction, SPHERE_CENTER, SPHERE_RADIUS)
+			if p:
+				normal = p - SPHERE_CENTER
+				normal.normalize()
+				file.write(f"{int(clamp(normal.dot(LIGHT_DIRECTION), 0, 1) * 255)} 0 0\n")
+			else:
+				file.write("0 0 0\n")
